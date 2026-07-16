@@ -65,7 +65,7 @@ export const useProduct = ({
         handle: handle,
         region_id,
         fields: fields ||
-          "*variants, +variants.inventory_quantity, +variants.manage_inventory, +variants.allow_backorder, *images, *options, *options.values, *collection, *tags",
+          "*variants, +variants.inventory_quantity, +variants.manage_inventory, +variants.allow_backorder, *images, *options, *options.values, *collection, *tags, +metadata",
       })
 
       if (!products || products.length === 0) {

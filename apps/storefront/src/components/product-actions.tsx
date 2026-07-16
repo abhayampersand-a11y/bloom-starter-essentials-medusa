@@ -54,6 +54,14 @@ const ProductActions = memo(function ProductActions({
     }
   }, [product?.variants])
 
+  // Colour codes set in the admin (product.metadata.color_hex)
+  const colorMap = useMemo(() => {
+    const stored = product?.metadata?.color_hex
+    return stored && typeof stored === "object"
+      ? (stored as Record<string, string>)
+      : undefined
+  }, [product?.metadata])
+
   const selectedVariant = useMemo(() => {
     if (!product?.variants || product?.variants.length === 0) {
       return
@@ -163,6 +171,7 @@ const ProductActions = memo(function ProductActions({
                   current={selectedOptions[option.id]}
                   updateOption={setOptionValue}
                   title={option.title ?? ""}
+                  colorMap={colorMap}
                   data-testid="product-options"
                   disabled={!!disabled || addToCartMutation.isPending}
                 />
