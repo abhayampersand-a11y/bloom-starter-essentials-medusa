@@ -1,4 +1,5 @@
 import {
+  authenticate,
   defineMiddlewares
 } from "@medusajs/framework/http"
 import path from "path"
@@ -9,8 +10,33 @@ console.log("[MIDDLEWARES] Loading middlewares.ts file")
 const uploadsDir = "/tmp/medusa-uploads"
 console.log("[MIDDLEWARES] Uploads directory:", uploadsDir)
 
+// Review submissions carry base64-encoded images inline, which blows past the
+// default JSON body limit. 5 images x 5MB, plus base64's ~33% overhead.
+const REVIEW_BODY_SIZE_LIMIT = "35mb"
+
 export default defineMiddlewares({
   routes: [
+    {
+      // allowUnregistered: the caller is mid-signup and has no customer record yet.
+      matcher: "/store/auth-identity/me",
+      method: "GET",
+      middlewares: [
+        authenticate("customer", ["bearer"], { allowUnregistered: true }),
+      ],
+    },
+    {
+      // Only signed-in customers can post a review; the reviewer's name comes
+      // from their account rather than the request body.
+      matcher: "/store/products/:id/reviews",
+      method: "POST",
+      bodyParser: { sizeLimit: REVIEW_BODY_SIZE_LIMIT },
+      middlewares: [authenticate("customer", ["bearer", "session"])],
+    },
+    {
+      matcher: "/admin/reviews",
+      method: "POST",
+      bodyParser: { sizeLimit: REVIEW_BODY_SIZE_LIMIT },
+    },
     {
       matcher: "/uploads*",
       middlewares: [

@@ -12,6 +12,11 @@ export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default") || providerId === "manual"
 }
 
+/** Cash on Delivery, served by the backend's own `cod-payment` module. */
+export const isCod = (providerId?: string) => {
+  return providerId?.startsWith("pp_cod_") || providerId === "cod"
+}
+
 // ============ ACTIVE PAYMENT SESSION ============
 
 export const getActivePaymentSession = (cart: HttpTypes.StoreCart): HttpTypes.StorePaymentSession | undefined => {

@@ -1,5 +1,7 @@
 import { DEFAULT_CART_DROPDOWN_FIELDS } from "@/components/cart"
-import ProductOptionSelect from "@/components/product-option-select"
+import ProductOptionSelect, {
+  COLOR_OPTION_TITLES,
+} from "@/components/product-option-select"
 import ProductPrice from "@/components/product-price"
 import { Button } from "@/components/ui/button"
 import { useCartDrawer } from "@/lib/hooks/use-cart-drawer"
@@ -31,7 +33,7 @@ const ProductActions = memo(function ProductActions({
   >({})
   const [quantity, setQuantity] = useState(1)
   const location = useLocation()
-  const countryCode = getCountryCodeFromPath(location.pathname) || "dk"
+  const countryCode = getCountryCodeFromPath(location.pathname) || "in"
 
   const addToCartMutation = useAddToCart({
     fields: DEFAULT_CART_DROPDOWN_FIELDS,
@@ -40,9 +42,17 @@ const ProductActions = memo(function ProductActions({
 
   const actionsRef = useRef<HTMLDivElement>(null)
 
+  // Reset options on product change, preselecting the first colour so the
+  // gallery starts filtered to one colour
   useEffect(() => {
-    setSelectedOptions({})
-  }, [product?.handle])
+    const colorOption = product?.options?.find((o) =>
+      COLOR_OPTION_TITLES.includes(o.title?.toLowerCase() ?? "")
+    )
+    const firstColor = colorOption?.values?.[0]?.value
+    setSelectedOptions(
+      colorOption && firstColor ? { [colorOption.id]: firstColor } : {}
+    )
+  }, [product?.handle, product?.options])
 
   // If there is only 1 variant, preselect the options
   useEffect(() => {

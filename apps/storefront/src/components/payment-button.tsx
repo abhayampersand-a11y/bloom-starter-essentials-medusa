@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { useCompleteCartOrder } from "@/lib/hooks/use-checkout"
-import { isManual, isStripe } from "@/lib/utils/checkout"
+import {
+  getActivePaymentSession,
+  isCod,
+  isManual,
+  isStripe,
+} from "@/lib/utils/checkout"
 import { getCountryCodeFromPath } from "@/lib/utils/region"
 import { HttpTypes } from "@medusajs/types"
 import { useLocation, useNavigate } from "@tanstack/react-router"
@@ -19,13 +24,17 @@ const PaymentButton = ({ cart, className }: PaymentButtonProps) => {
     !cart.email ||
     (cart.shipping_methods?.length ?? 0) < 1
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  // The session the review step displays, rather than whichever happens to be
+  // first — switching payment method leaves the earlier session behind.
+  const paymentSession = getActivePaymentSession(cart)
 
   switch (true) {
     case isStripe(paymentSession?.provider_id):
       return <StripePaymentButton notReady={notReady} className={className} />
+    // Neither takes money online: the order is placed and settled afterwards.
     case isManual(paymentSession?.provider_id):
-      return <ManualPaymentButton notReady={notReady} className={className} />
+    case isCod(paymentSession?.provider_id):
+      return <PlaceOrderButton notReady={notReady} className={className} />
     default:
       return <Button disabled>Select a payment method</Button>
   }
@@ -82,7 +91,8 @@ const StripePaymentButton = ({
   )
 }
 
-const ManualPaymentButton = ({
+/** Used by every provider that settles offline — manual and Cash on Delivery. */
+const PlaceOrderButton = ({
   notReady,
   className,
 }: {

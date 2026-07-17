@@ -2,11 +2,13 @@ import CheckoutProgress from "@/components/checkout-progress"
 import { CartEmpty } from "@/components/cart"
 import { Loading } from "@/components/ui/loading"
 import { useCart } from "@/lib/hooks/use-cart"
+import { useCustomer } from "@/lib/hooks/use-customer"
 import { type CheckoutStep, CheckoutStepKey } from "@/lib/types/global"
 import {
   useLoaderData,
   useLocation,
   useNavigate,
+  useParams,
 } from "@tanstack/react-router"
 import { lazy, Suspense, useCallback, useEffect, useMemo } from "react"
 
@@ -21,8 +23,23 @@ const Checkout = () => {
     from: "/$countryCode/checkout",
   })
   const { data: cart, isLoading: cartLoading } = useCart()
+  const { data: customer, isLoading: customerLoading } = useCustomer()
   const location = useLocation()
   const navigate = useNavigate()
+  const { countryCode } = useParams({ strict: false })
+
+  // The auth token lives in localStorage, so this can't be a loader redirect —
+  // the server has no way to know who's signed in.
+  useEffect(() => {
+    if (!customerLoading && !customer) {
+      navigate({
+        to: "/$countryCode/auth",
+        params: { countryCode: countryCode || "in" },
+        search: { redirect: location.pathname },
+        replace: true,
+      })
+    }
+  }, [customer, customerLoading, countryCode, location.pathname, navigate])
 
   const steps: CheckoutStep[] = useMemo(() => {
     return [
@@ -115,6 +132,15 @@ const Checkout = () => {
     if (prevIndex >= 0) {
       goToStep(steps[prevIndex].key)
     }
+  }
+
+  // Don't flash the checkout to a signed-out visitor mid-redirect.
+  if (customerLoading || !customer) {
+    return (
+      <div className="content-container pt-40 pb-8">
+        <Loading />
+      </div>
+    )
   }
 
   return (

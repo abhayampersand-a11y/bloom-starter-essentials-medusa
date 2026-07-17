@@ -29,6 +29,7 @@ export const queryKeys = {
     ...createDomainKeys("customer"),
     current: () => [...queryKeys.customer.all] as const,
     orders: () => createDynamicKey("customer", "orders"),
+    addresses: () => createDynamicKey("customer", "addresses"),
   },
 
   products: {
@@ -41,6 +42,12 @@ export const queryKeys = {
 
   orders: {
     ...createDomainKeys("orders"),
+  },
+
+  reviews: {
+    ...createDomainKeys("reviews"),
+    forProduct: (productId: string, limit?: number, offset?: number) =>
+      createDynamicKey("reviews", "forProduct", productId, limit, offset),
   },
 
   regions: {

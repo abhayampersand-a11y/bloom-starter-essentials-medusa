@@ -5,6 +5,10 @@
     "Helvetica Neue", Ubuntu, sans-serif;
   --font-display:
     Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Editorial serif, used for the home page's display headings. Applied only
+     where `font-editorial` is set — the rest of the site stays on Outfit. */
+  --font-editorial:
+    "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
   
   /* Brand Colors - Scandinavian Athleisure Palette */
   --color-sand-50: #faf9f7;

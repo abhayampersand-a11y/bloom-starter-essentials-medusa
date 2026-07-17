@@ -10,6 +10,10 @@ export const AccountDropdown = () => {
   const { data: customer } = useCustomer()
   const { mutate: logout } = useLogout()
 
+  // Signing in should return the shopper to where they were — checkout above
+  // all. Pointing back at the sign-in page itself would strand them there.
+  const isAuthPage = location.pathname.endsWith("/auth")
+
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
@@ -60,8 +64,9 @@ export const AccountDropdown = () => {
               <div className="flex flex-col py-2">
                 <NavigationMenu.Link asChild>
                   <Link
-                    to="/$countryCode/account"
+                    to="/$countryCode/auth"
                     params={{ countryCode: countryCode || "us" }}
+                    search={isAuthPage ? {} : { redirect: location.pathname }}
                     className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm transition-colors"
                   >
                     Login

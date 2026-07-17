@@ -192,6 +192,10 @@ export const useCompleteCartOrder = () => {
       queryClient.invalidateQueries({ predicate: queryKeys.cart.predicate })
       await queryClient.refetchQueries({ predicate: queryKeys.cart.predicate })
 
+      // The order history was fetched before this order existed, so without
+      // this the account page keeps serving the stale list.
+      queryClient.invalidateQueries({ queryKey: queryKeys.customer.orders() })
+
       return order
     },
   })

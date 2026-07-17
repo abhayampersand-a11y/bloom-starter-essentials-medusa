@@ -1,6 +1,8 @@
 import ProductActions from "@/components/product-actions"
+import { COLOR_OPTION_TITLES } from "@/components/product-option-select"
 import { ImageGalleryEnhanced } from "@/components/ui/image-gallery-enhanced"
 import { ProductAccordions } from "@/components/product/product-accordions"
+import { ProductReviews } from "@/components/product/product-reviews"
 import { RelatedProducts } from "@/components/product/related-products"
 import { useLoaderData, useLocation } from "@tanstack/react-router"
 import { useProducts } from "@/lib/hooks/use-products"
@@ -84,16 +86,17 @@ const ProductDetails = () => {
       .filter((p) => p.id !== product.id)
       .slice(0, 4) || []
 
-  // Reorder images based on selected color option
-  // Images linked to variants with the selected color appear first
+  // Filter images based on selected color option: only the images linked to
+  // variants with the selected color are shown
   const displayImages = useMemo(() => {
     const allImages = product.images || []
-    
+
     // Find the color option
     const colorOption = product.options?.find(
-      (opt: HttpTypes.StoreProductOption) => opt.title.toLowerCase() === "color"
+      (opt: HttpTypes.StoreProductOption) =>
+        COLOR_OPTION_TITLES.includes(opt.title?.toLowerCase() ?? "")
     )
-    
+
     if (!colorOption) {
       return allImages
     }
@@ -117,9 +120,10 @@ const ProductDetails = () => {
     )
 
     const variantImages = allImages.filter((img: HttpTypes.StoreProductImage) => variantImageIds.has(img.id))
-    const otherImages = allImages.filter((img: HttpTypes.StoreProductImage) => !variantImageIds.has(img.id))
 
-    return [...variantImages, ...otherImages]
+    // Show only the selected colour's images; fall back to all images when
+    // no images are linked to the matching variants
+    return variantImages.length > 0 ? variantImages : allImages
   }, [product.images, product.options, product.variants, selectedOptions])
 
   return (
@@ -189,6 +193,9 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Customer Reviews */}
+      <ProductReviews productId={product.id} countryCode={countryCode} />
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (

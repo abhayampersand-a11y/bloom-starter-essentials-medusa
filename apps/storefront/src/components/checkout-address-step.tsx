@@ -1,12 +1,21 @@
 import AddressForm from "@/components/address-form"
+import SavedAddressPicker, { NEW_ADDRESS_ID } from "@/components/saved-address-picker"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { useSetCartAddresses } from "@/lib/hooks/use-checkout"
+import { useCustomer } from "@/lib/hooks/use-customer"
+import {
+  isSameAddress,
+  pickDefaultAddress,
+  toAddressFormData,
+  useCreateCustomerAddress,
+  useCustomerAddresses,
+} from "@/lib/hooks/use-customer-addresses"
 import { AddressFormData } from "@/lib/types/global"
 import { getStoredCountryCode } from "@/lib/utils/region"
 import { HttpTypes } from "@medusajs/types"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { sdk } from "@/lib/utils/sdk"
 import { useQuery } from "@tanstack/react-query"
 
@@ -23,6 +32,16 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
   const [isBillingAddressValid, setIsBillingAddressValid] = useState(false)
   const [email, setEmail] = useState(cart.email || "")
   const storedCountryCode = getStoredCountryCode()
+
+  const { data: customer } = useCustomer()
+  const { data: savedAddresses = [] } = useCustomerAddresses({
+    enabled: !!customer,
+  })
+  const createAddressMutation = useCreateCustomerAddress()
+
+  // Which saved address is in use, or NEW_ADDRESS_ID while typing a new one.
+  const [selectedAddressId, setSelectedAddressId] = useState<string>(NEW_ADDRESS_ID)
+  const [hasAutoSelected, setHasAutoSelected] = useState(false)
 
   // Fetch all regions and countries for worldwide shipping
   const { data: allCountries } = useQuery({
@@ -65,7 +84,71 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
     phone: cart.billing_address?.phone || "",
   })
 
+  // Once the saved addresses arrive, preselect the default (or the only one) and
+  // fill the form from it, so a returning customer can just click Next. Runs
+  // once so it never fights a later manual choice.
+  useEffect(() => {
+    if (hasAutoSelected || !savedAddresses.length) {
+      return
+    }
 
+    setHasAutoSelected(true)
+
+    // A cart that already carries an address was set on a previous visit —
+    // leave it alone rather than overwriting the customer's earlier choice.
+    if (cart.shipping_address?.address_1) {
+      const matching = savedAddresses.find(
+        (a) =>
+          a.address_1 === cart.shipping_address?.address_1 &&
+          a.postal_code === cart.shipping_address?.postal_code
+      )
+      if (matching?.id) {
+        setSelectedAddressId(matching.id)
+      }
+      return
+    }
+
+    const preferred = pickDefaultAddress(savedAddresses)
+    if (preferred?.id) {
+      setSelectedAddressId(preferred.id)
+      setShippingAddress(toAddressFormData(preferred, defaultCountryCode))
+    }
+  }, [savedAddresses, hasAutoSelected, cart.shipping_address, defaultCountryCode])
+
+  // The account's email is the one orders should go to; only prefill an empty field.
+  useEffect(() => {
+    if (!email && customer?.email) {
+      setEmail(customer.email)
+    }
+  }, [customer?.email, email])
+
+  const handleSelectAddress = (id: string) => {
+    setSelectedAddressId(id)
+
+    if (id === NEW_ADDRESS_ID) {
+      // Start from a blank form rather than leaving the previous address behind.
+      setShippingAddress({
+        first_name: "",
+        last_name: "",
+        company: "",
+        address_1: "",
+        address_2: "",
+        city: "",
+        postal_code: "",
+        province: "",
+        country_code: defaultCountryCode,
+        phone: "",
+      })
+      return
+    }
+
+    const selected = savedAddresses.find((a) => a.id === id)
+    if (selected) {
+      setShippingAddress(toAddressFormData(selected, defaultCountryCode))
+    }
+  }
+
+  const isUsingNewAddress = selectedAddressId === NEW_ADDRESS_ID
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,6 +175,26 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
       })
 
       await setAddressesMutation.mutateAsync(submitData)
+
+      // A new address goes into the address book automatically, so the next
+      // checkout offers it as a pick instead of an empty form. The first one
+      // becomes the default, which is what gets preselected from then on.
+      // Saving shouldn't block checkout if it fails.
+      const isAlreadySaved = savedAddresses.some((saved) =>
+        isSameAddress(saved, shippingAddress)
+      )
+
+      if (customer && isUsingNewAddress && !isAlreadySaved) {
+        try {
+          await createAddressMutation.mutateAsync({
+            ...shippingAddress,
+            is_default_shipping: savedAddresses.length === 0,
+          })
+        } catch {
+          // The order can still proceed with the address set on the cart.
+        }
+      }
+
       onNext()
     } catch {
       // Error handled by mutation
@@ -103,9 +206,13 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
   const isFormValid = () => {
     const emailValid = email.trim() && email.includes("@")
 
+    // A saved address was already validated when it was created, and the form
+    // that reports `isShippingAddressValid` isn't rendered while one is picked.
+    const shippingValid = isUsingNewAddress ? isShippingAddressValid : true
+
     return (
       emailValid &&
-      isShippingAddressValid &&
+      shippingValid &&
       (isBillingAddressValid || sameAsBilling)
     )
   }
@@ -115,17 +222,39 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
   return (
     <div className="flex flex-col gap-8">
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <h3 className="text-zinc-900 !text-base font-semibold">
             Shipping Address
           </h3>
-          {/* Shipping Address */}
-          <AddressForm
-            addressFormData={shippingAddress}
-            setAddressFormData={setShippingAddress}
-            countries={allCountries}
-            setIsFormValid={setIsShippingAddressValid}
-          />
+
+          {/* Saved addresses, when the customer has any */}
+          {savedAddresses.length > 0 && (
+            <SavedAddressPicker
+              addresses={savedAddresses}
+              selectedId={selectedAddressId}
+              onSelect={handleSelectAddress}
+            />
+          )}
+
+          {/* The form is only needed while entering a new address */}
+          {isUsingNewAddress && (
+            <div className="flex flex-col gap-2">
+              <AddressForm
+                addressFormData={shippingAddress}
+                setAddressFormData={setShippingAddress}
+                countries={allCountries}
+                setIsFormValid={setIsShippingAddressValid}
+              />
+
+              {customer && (
+                <p className="pt-2 text-xs text-zinc-600">
+                  {savedAddresses.length === 0
+                    ? "We'll save this to your account as your default delivery address."
+                    : "We'll save this to your account so you can pick it next time."}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Billing Address Checkbox */}

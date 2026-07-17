@@ -17,6 +17,7 @@ import { Route as CountryCodeRouteImport } from './routes/$countryCode'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CountryCodeIndexRouteImport } from './routes/$countryCode/index'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as CountryCodeTermsRouteImport } from './routes/$countryCode/terms'
 import { Route as CountryCodeStoreRouteImport } from './routes/$countryCode/store'
 import { Route as CountryCodeShippingRouteImport } from './routes/$countryCode/shipping'
@@ -29,6 +30,7 @@ import { Route as CountryCodeContactRouteImport } from './routes/$countryCode/co
 import { Route as CountryCodeCheckoutRouteImport } from './routes/$countryCode/checkout'
 import { Route as CountryCodeCartRouteImport } from './routes/$countryCode/cart'
 import { Route as CountryCodeBlogRouteImport } from './routes/$countryCode/blog'
+import { Route as CountryCodeAuthRouteImport } from './routes/$countryCode/auth'
 import { Route as CountryCodeAccountRouteImport } from './routes/$countryCode/account'
 import { Route as CountryCodeAboutRouteImport } from './routes/$countryCode/about'
 import { Route as CountryCodeAccountIndexRouteImport } from './routes/$countryCode/account/index'
@@ -78,6 +80,11 @@ const CountryCodeIndexRoute = CountryCodeIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CountryCodeRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CountryCodeTermsRoute = CountryCodeTermsRouteImport.update({
   id: '/terms',
@@ -137,6 +144,11 @@ const CountryCodeCartRoute = CountryCodeCartRouteImport.update({
 const CountryCodeBlogRoute = CountryCodeBlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => CountryCodeRoute,
+} as any)
+const CountryCodeAuthRoute = CountryCodeAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => CountryCodeRoute,
 } as any)
 const CountryCodeAccountRoute = CountryCodeAccountRouteImport.update({
@@ -201,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/store': typeof StoreRoute
   '/$countryCode/about': typeof CountryCodeAboutRoute
   '/$countryCode/account': typeof CountryCodeAccountRouteWithChildren
+  '/$countryCode/auth': typeof CountryCodeAuthRoute
   '/$countryCode/blog': typeof CountryCodeBlogRoute
   '/$countryCode/cart': typeof CountryCodeCartRoute
   '/$countryCode/checkout': typeof CountryCodeCheckoutRoute
@@ -213,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/$countryCode/shipping': typeof CountryCodeShippingRoute
   '/$countryCode/store': typeof CountryCodeStoreRoute
   '/$countryCode/terms': typeof CountryCodeTermsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/$countryCode/': typeof CountryCodeIndexRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
@@ -230,6 +244,7 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/store': typeof StoreRoute
   '/$countryCode/about': typeof CountryCodeAboutRoute
+  '/$countryCode/auth': typeof CountryCodeAuthRoute
   '/$countryCode/blog': typeof CountryCodeBlogRoute
   '/$countryCode/cart': typeof CountryCodeCartRoute
   '/$countryCode/checkout': typeof CountryCodeCheckoutRoute
@@ -242,6 +257,7 @@ export interface FileRoutesByTo {
   '/$countryCode/shipping': typeof CountryCodeShippingRoute
   '/$countryCode/store': typeof CountryCodeStoreRoute
   '/$countryCode/terms': typeof CountryCodeTermsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/$countryCode': typeof CountryCodeIndexRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
@@ -262,6 +278,7 @@ export interface FileRoutesById {
   '/store': typeof StoreRoute
   '/$countryCode/about': typeof CountryCodeAboutRoute
   '/$countryCode/account': typeof CountryCodeAccountRouteWithChildren
+  '/$countryCode/auth': typeof CountryCodeAuthRoute
   '/$countryCode/blog': typeof CountryCodeBlogRoute
   '/$countryCode/cart': typeof CountryCodeCartRoute
   '/$countryCode/checkout': typeof CountryCodeCheckoutRoute
@@ -274,6 +291,7 @@ export interface FileRoutesById {
   '/$countryCode/shipping': typeof CountryCodeShippingRoute
   '/$countryCode/store': typeof CountryCodeStoreRoute
   '/$countryCode/terms': typeof CountryCodeTermsRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/$countryCode/': typeof CountryCodeIndexRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
@@ -295,6 +313,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/$countryCode/about'
     | '/$countryCode/account'
+    | '/$countryCode/auth'
     | '/$countryCode/blog'
     | '/$countryCode/cart'
     | '/$countryCode/checkout'
@@ -307,6 +326,7 @@ export interface FileRouteTypes {
     | '/$countryCode/shipping'
     | '/$countryCode/store'
     | '/$countryCode/terms'
+    | '/auth/callback'
     | '/$countryCode/'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
@@ -324,6 +344,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/store'
     | '/$countryCode/about'
+    | '/$countryCode/auth'
     | '/$countryCode/blog'
     | '/$countryCode/cart'
     | '/$countryCode/checkout'
@@ -336,6 +357,7 @@ export interface FileRouteTypes {
     | '/$countryCode/shipping'
     | '/$countryCode/store'
     | '/$countryCode/terms'
+    | '/auth/callback'
     | '/$countryCode'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
@@ -355,6 +377,7 @@ export interface FileRouteTypes {
     | '/store'
     | '/$countryCode/about'
     | '/$countryCode/account'
+    | '/$countryCode/auth'
     | '/$countryCode/blog'
     | '/$countryCode/cart'
     | '/$countryCode/checkout'
@@ -367,6 +390,7 @@ export interface FileRouteTypes {
     | '/$countryCode/shipping'
     | '/$countryCode/store'
     | '/$countryCode/terms'
+    | '/auth/callback'
     | '/$countryCode/'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
@@ -385,6 +409,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   HealthRoute: typeof HealthRoute
   StoreRoute: typeof StoreRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -444,6 +469,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$countryCode/'
       preLoaderRoute: typeof CountryCodeIndexRouteImport
       parentRoute: typeof CountryCodeRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/$countryCode/terms': {
       id: '/$countryCode/terms'
@@ -527,6 +559,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/$countryCode/blog'
       preLoaderRoute: typeof CountryCodeBlogRouteImport
+      parentRoute: typeof CountryCodeRoute
+    }
+    '/$countryCode/auth': {
+      id: '/$countryCode/auth'
+      path: '/auth'
+      fullPath: '/$countryCode/auth'
+      preLoaderRoute: typeof CountryCodeAuthRouteImport
       parentRoute: typeof CountryCodeRoute
     }
     '/$countryCode/account': {
@@ -613,6 +652,7 @@ const CountryCodeAccountRouteWithChildren =
 interface CountryCodeRouteChildren {
   CountryCodeAboutRoute: typeof CountryCodeAboutRoute
   CountryCodeAccountRoute: typeof CountryCodeAccountRouteWithChildren
+  CountryCodeAuthRoute: typeof CountryCodeAuthRoute
   CountryCodeBlogRoute: typeof CountryCodeBlogRoute
   CountryCodeCartRoute: typeof CountryCodeCartRoute
   CountryCodeCheckoutRoute: typeof CountryCodeCheckoutRoute
@@ -635,6 +675,7 @@ interface CountryCodeRouteChildren {
 const CountryCodeRouteChildren: CountryCodeRouteChildren = {
   CountryCodeAboutRoute: CountryCodeAboutRoute,
   CountryCodeAccountRoute: CountryCodeAccountRouteWithChildren,
+  CountryCodeAuthRoute: CountryCodeAuthRoute,
   CountryCodeBlogRoute: CountryCodeBlogRoute,
   CountryCodeCartRoute: CountryCodeCartRoute,
   CountryCodeCheckoutRoute: CountryCodeCheckoutRoute,
@@ -666,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   HealthRoute: HealthRoute,
   StoreRoute: StoreRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

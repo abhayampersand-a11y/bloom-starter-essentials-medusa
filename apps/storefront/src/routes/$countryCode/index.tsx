@@ -1,8 +1,6 @@
 import Home from "@/pages/home"
 import { createFileRoute } from "@tanstack/react-router"
 import { getRegion } from "@/lib/data/regions"
-import { listProducts } from "@/lib/data/products"
-import { queryKeys } from "@/lib/utils/query-keys"
 
 export const Route = createFileRoute("/$countryCode/")({
   loader: async ({ params, context }) => {
@@ -15,32 +13,14 @@ export const Route = createFileRoute("/$countryCode/")({
       queryFn: () => getRegion({ country_code: countryCode }),
     })
 
-    if (!region) {
-      return { countryCode, region: null }
-    }
-
-    // Prefetch latest products for SSR (non-blocking)
-    // FeaturedProducts component will use cached data when available
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.products.latest(4, region.id),
-      queryFn: () =>
-        listProducts({
-          query_params: {
-            limit: 4,
-            order: "-created_at",
-          },
-          region_id: region.id,
-        }),
-    })
-
     return {
       countryCode,
-      region,
+      region: region ?? null,
     }
   },
   head: () => {
-    const title = `Welcome to Medusa Store`
-    const description = `Discover our curated collection of products. Browse our latest featured items and shop with confidence.`
+    const title = `Essentials — Movement, simplified.`
+    const description = `Scandinavian-inspired athleisure designed for everyday balance. Explore new arrivals, seasonal collections, and the stories behind them.`
 
     return {
       meta: [
