@@ -28,12 +28,20 @@ export function useCustomerAddresses({ enabled = true }: { enabled?: boolean } =
   })
 }
 
+/** The fields the address book writes, beyond the plain form data. */
+export type AddressWriteData = AddressFormData & {
+  /** The customer's own nickname for the address, e.g. "Home". */
+  address_name?: string
+  is_default_shipping?: boolean
+  is_default_billing?: boolean
+}
+
 /** Saves a new address to the signed-in customer's address book. */
 export function useCreateCustomerAddress() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (address: AddressFormData & { is_default_shipping?: boolean }) => {
+    mutationFn: async (address: AddressWriteData) => {
       const { customer } = await sdk.client.fetch<{
         customer: HttpTypes.StoreCustomer
       }>("/store/customers/me/addresses", {
@@ -41,6 +49,48 @@ export function useCreateCustomerAddress() {
         body: address,
       })
       return customer
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.customer.addresses() })
+    },
+  })
+}
+
+/**
+ * Edits a saved address. Also the way an address is promoted to default —
+ * there's no dedicated endpoint for that, it's a write of `is_default_shipping`.
+ */
+export function useUpdateCustomerAddress() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...address
+    }: Partial<AddressWriteData> & { id: string }) => {
+      const { customer } = await sdk.client.fetch<{
+        customer: HttpTypes.StoreCustomer
+      }>(`/store/customers/me/addresses/${id}`, {
+        method: "POST",
+        body: address,
+      })
+      return customer
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.customer.addresses() })
+    },
+  })
+}
+
+/** Removes an address from the address book. Orders already placed keep theirs. */
+export function useDeleteCustomerAddress() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await sdk.client.fetch(`/store/customers/me/addresses/${id}`, {
+        method: "DELETE",
+      })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.customer.addresses() })

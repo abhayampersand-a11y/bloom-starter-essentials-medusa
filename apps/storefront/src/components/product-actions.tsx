@@ -3,13 +3,15 @@ import ProductOptionSelect, {
   COLOR_OPTION_TITLES,
 } from "@/components/product-option-select"
 import ProductPrice from "@/components/product-price"
+import { SizeGuideModal } from "@/components/product/size-guide-modal"
 import { Button } from "@/components/ui/button"
 import { useCartDrawer } from "@/lib/hooks/use-cart-drawer"
 import { useAddToCart } from "@/lib/hooks/use-cart"
 import { getVariantOptionsKeymap, isVariantInStock } from "@/lib/utils/product"
 import { getCountryCodeFromPath } from "@/lib/utils/region"
+import { CheckoutStepKey } from "@/lib/types/global"
 import { HttpTypes } from "@medusajs/types"
-import { useLocation } from "@tanstack/react-router"
+import { useLocation, useNavigate } from "@tanstack/react-router"
 import { isEqual } from "lodash-es"
 import { useEffect, useMemo, useRef, useState, memo } from "react"
 
@@ -31,8 +33,8 @@ const ProductActions = memo(function ProductActions({
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, string | undefined>
   >({})
-  const [quantity, setQuantity] = useState(1)
   const location = useLocation()
+  const navigate = useNavigate()
   const countryCode = getCountryCodeFromPath(location.pathname) || "in"
 
   const addToCartMutation = useAddToCart({
@@ -138,29 +140,56 @@ const ProductActions = memo(function ProductActions({
     return isVariantInStock(selectedVariant)
   }, [selectedVariant])
 
+  const canPurchase =
+    !!selectedVariant && inStock && !!isValidVariant && !disabled
+
   // add the selected variant to the cart
-  const handleAddToCart = async () => {
+  const addToCart = async () => {
     if (!selectedVariant?.id) return null
 
-    addToCartMutation.mutateAsync(
-      {
-        variant_id: selectedVariant.id,
-        quantity: quantity,
-        country_code: countryCode,
-        product,
-        variant: selectedVariant,
-        region,
-      },
-      {
-        onSuccess: () => {
-          openCart()
-        },
-      }
-    )
+    return addToCartMutation.mutateAsync({
+      variant_id: selectedVariant.id,
+      quantity: 1,
+      country_code: countryCode,
+      product,
+      variant: selectedVariant,
+      region,
+    })
   }
 
+  const handleAddToCart = async () => {
+    try {
+      await addToCart()
+      openCart()
+    } catch {
+      // Failure is surfaced through the mutation's error state
+    }
+  }
+
+  // Skip the cart drawer and send the shopper straight to checkout
+  const handleBuyNow = async () => {
+    try {
+      await addToCart()
+      navigate({
+        to: "/$countryCode/checkout",
+        params: { countryCode },
+        search: { step: CheckoutStepKey.ADDRESSES },
+      })
+    } catch {
+      // Failure is surfaced through the mutation's error state
+    }
+  }
+
+  const addToBagLabel = !selectedVariant
+    ? "Select options"
+    : !inStock || !isValidVariant
+      ? "Out of stock"
+      : addToCartMutation.isPending
+        ? "Adding..."
+        : "Add to bag"
+
   return (
-    <div className="flex flex-col gap-y-6" ref={actionsRef}>
+    <div className="flex flex-col gap-y-8" ref={actionsRef}>
       {/* Price */}
       <ProductPrice
         product={product as HttpTypes.StoreProduct}
@@ -172,63 +201,49 @@ const ProductActions = memo(function ProductActions({
 
       {/* Variant options (color, size, etc.) */}
       {(product.variants?.length ?? 0) > 1 && (
-        <div className="flex flex-col gap-y-6">
+        <div className="flex flex-col gap-y-8">
           {(product.options || []).map((option) => {
+            const isColorOption = COLOR_OPTION_TITLES.includes(
+              option.title?.toLowerCase() ?? ""
+            )
+
             return (
-              <div key={option.id}>
-                <ProductOptionSelect
-                  option={option}
-                  current={selectedOptions[option.id]}
-                  updateOption={setOptionValue}
-                  title={option.title ?? ""}
-                  colorMap={colorMap}
-                  data-testid="product-options"
-                  disabled={!!disabled || addToCartMutation.isPending}
-                />
-              </div>
+              <ProductOptionSelect
+                key={option.id}
+                option={option}
+                current={selectedOptions[option.id]}
+                updateOption={setOptionValue}
+                title={option.title ?? ""}
+                colorMap={colorMap}
+                action={isColorOption ? undefined : <SizeGuideModal />}
+                data-testid="product-options"
+                disabled={!!disabled || addToCartMutation.isPending}
+              />
             )
           })}
         </div>
       )}
 
-      {/* Quantity selector */}
-      <div className="flex flex-col gap-y-2">
-        <label className="text-sm font-medium">Quantity</label>
-        <div className="flex items-center gap-x-4">
-          <button
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            disabled={quantity <= 1 || !!disabled}
-            className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            type="button"
-          >
-            -
-          </button>
-          <span className="w-12 text-center font-medium">{quantity}</span>
-          <button
-            onClick={() => setQuantity(quantity + 1)}
-            disabled={!!disabled}
-            className="w-10 h-10 flex items-center justify-center border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            type="button"
-          >
-            +
-          </button>
-        </div>
-      </div>
+      <div className="flex flex-col gap-y-3">
+        <Button
+          onClick={handleAddToCart}
+          disabled={!canPurchase || addToCartMutation.isPending}
+          variant="primary"
+          className="w-full bg-neutral-900 hover:bg-neutral-800 py-4 text-xs font-medium uppercase tracking-[0.15em]"
+          data-testid="add-product-button"
+        >
+          {addToBagLabel}
+        </Button>
 
-      {/* Add to cart button */}
-      <Button
-        onClick={handleAddToCart}
-        disabled={!inStock || !selectedVariant || !!disabled || !isValidVariant}
-        variant="primary"
-        className="w-full"
-        data-testid="add-product-button"
-      >
-        {!selectedVariant
-          ? "Select variant"
-          : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
-      </Button>
+        <Button
+          onClick={handleBuyNow}
+          disabled={!canPurchase || addToCartMutation.isPending}
+          variant="secondary"
+          className="w-full border-neutral-300 py-4 text-xs font-medium uppercase tracking-[0.15em] hover:border-neutral-900"
+        >
+          Buy it now
+        </Button>
+      </div>
     </div>
   )
 })

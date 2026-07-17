@@ -53,6 +53,15 @@ export const AccountDropdown = () => {
                     My Orders
                   </Link>
                 </NavigationMenu.Link>
+                <NavigationMenu.Link asChild>
+                  <Link
+                    to="/$countryCode/account/addresses"
+                    params={{ countryCode: countryCode || "us" }}
+                    className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm transition-colors"
+                  >
+                    Addresses
+                  </Link>
+                </NavigationMenu.Link>
                 <button
                   onClick={handleLogout}
                   className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm transition-colors text-left"

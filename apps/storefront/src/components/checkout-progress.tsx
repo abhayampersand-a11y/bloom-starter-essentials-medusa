@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { CheckCircleSolid } from "@medusajs/icons"
 import { CheckoutStep, CheckoutStepKey } from "@/lib/types/global"
 import { clsx } from "clsx"
 
@@ -9,6 +9,10 @@ type CheckoutProgressProps = {
   className?: string;
 };
 
+/**
+ * The checkout step nav. Steps already passed keep their tick and stay
+ * clickable; steps ahead are disabled until their prerequisites are met.
+ */
 const CheckoutProgress = ({
   steps,
   currentStepIndex,
@@ -16,29 +20,44 @@ const CheckoutProgress = ({
   className,
 }: CheckoutProgressProps) => {
   return (
-    <div className={clsx("flex flex-wrap gap-4 items-center", className)}>
-      {steps.map((step, index) => (
-        <div key={step.key} className="flex items-center gap-4">
-          <Button
-            onClick={() => handleStepChange(step.key)}
-            variant={"transparent"}
-            className={clsx(
-              "p-0 hover:bg-transparent",
-              index !== currentStepIndex &&
-                "text-zinc-600 hover:text-zinc-500",
-              index === currentStepIndex &&
-                "text-zinc-900 hover:text-zinc-600"
+    <nav
+      className={clsx("flex flex-wrap items-center gap-x-4 gap-y-3", className)}
+      aria-label="Checkout progress"
+    >
+      {steps.map((step, index) => {
+        const isCurrent = index === currentStepIndex
+        const isDone = index < currentStepIndex
+        const isUpcoming = index > currentStepIndex
+
+        return (
+          <div key={step.key} className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => handleStepChange(step.key)}
+              disabled={isUpcoming}
+              aria-current={isCurrent ? "step" : undefined}
+              className={clsx(
+                "flex items-center gap-2 pb-1 border-b transition-colors",
+                "text-[11px] uppercase tracking-[0.15em]",
+                isCurrent &&
+                  "text-neutral-900 font-semibold border-neutral-900",
+                isDone &&
+                  "text-neutral-900 border-transparent hover:text-neutral-500 cursor-pointer",
+                isUpcoming &&
+                  "text-neutral-400 border-transparent cursor-not-allowed"
+              )}
+            >
+              {isDone && <CheckCircleSolid className="h-3.5 w-3.5" />}
+              {step.title}
+            </button>
+
+            {index < steps.length - 1 && (
+              <span aria-hidden="true" className="h-px w-8 bg-neutral-300" />
             )}
-            disabled={index > currentStepIndex}
-          >
-            {step.title}
-          </Button>
-          {index < steps.length - 1 && (
-            <div className="w-8 h-px bg-zinc-200" />
-          )}
-        </div>
-      ))}
-    </div>
+          </div>
+        )
+      })}
+    </nav>
   )
 }
 

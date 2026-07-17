@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, MagnifyingGlass } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
+import { clsx } from "clsx"
 import { useState, useCallback, memo, useEffect } from "react"
 
 type ImageGalleryEnhancedProps = {
@@ -10,11 +11,13 @@ type ImageGalleryEnhancedProps = {
 const ImageGalleryEnhanced = memo(function ImageGalleryEnhanced({
   images,
 }: ImageGalleryEnhancedProps) {
+  const [activeIndex, setActiveIndex] = useState(0)
   const [currentZoomIndex, setCurrentZoomIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
 
   // Reset to first image when images change
   useEffect(() => {
+    setActiveIndex(0)
     setCurrentZoomIndex(0)
   }, [images])
 
@@ -39,57 +42,75 @@ const ImageGalleryEnhanced = memo(function ImageGalleryEnhanced({
     )
   }
 
-  return (
-    <div className="space-y-3">
-      {/* Main Image */}
-      <div 
-        className="relative aspect-[4/5] w-full overflow-hidden bg-sand-50 group cursor-zoom-in"
-        onClick={() => openZoom(0)}
-      >
-        {!!images[0]?.url && (
-          <>
-            <img
-              src={images[0].url}
-              className="w-full h-full object-cover"
-              alt="Main product image"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-              <MagnifyingGlass className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </>
-        )}
-      </div>
+  const activeImage = images[activeIndex] ?? images[0]
 
-      {/* All remaining images in grid */}
-      {images.length > 1 && (
-        <div className="grid grid-cols-2 gap-3">
-          {images.slice(1).map((image, index) => (
-            <div 
-              key={image.id}
-              className="relative aspect-[4/5] overflow-hidden bg-sand-50 group cursor-zoom-in"
-              onClick={() => openZoom(index + 1)}
-            >
-              {!!image.url && (
-                <>
+  return (
+    <div>
+      <div className="flex gap-3 md:gap-4">
+        {/* Thumbnail rail */}
+        {images.length > 1 && (
+          <div className="flex flex-col gap-3 shrink-0 w-14 md:w-[72px]">
+            {images.map((image, index) => (
+              <button
+                key={image.id}
+                type="button"
+                onClick={() => setActiveIndex(index)}
+                onMouseEnter={() => setActiveIndex(index)}
+                aria-label={`View image ${index + 1}`}
+                aria-current={index === activeIndex}
+                className={clsx(
+                  "relative aspect-[4/5] overflow-hidden bg-sand-50 transition-opacity",
+                  index === activeIndex
+                    ? "ring-1 ring-neutral-900"
+                    : "opacity-70 hover:opacity-100"
+                )}
+              >
+                {!!image.url && (
                   <img
                     src={image.url}
-                    alt={`Product image ${index + 2}`}
+                    alt={`Product thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                    <MagnifyingGlass className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Main image */}
+        <div className="flex-1 min-w-0">
+          <div
+            className="relative aspect-[4/5] w-full overflow-hidden bg-sand-50 group cursor-zoom-in"
+            onClick={() => openZoom(activeIndex)}
+          >
+            {!!activeImage?.url && (
+              <img
+                src={activeImage.url}
+                className="w-full h-full object-cover"
+                alt="Main product image"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+              />
+            )}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+          </div>
+
+          {/* Zoom affordance */}
+          <div className="flex justify-end pt-4">
+            <button
+              type="button"
+              onClick={() => openZoom(activeIndex)}
+              aria-label="Zoom image"
+              className="text-neutral-500 hover:text-neutral-900 transition-colors"
+            >
+              <MagnifyingGlass className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* Zoom Modal */}
       {isZoomed && (

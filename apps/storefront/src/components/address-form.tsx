@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { countries } from "@/lib/constants/countries"
+import { EYEBROW } from "@/lib/constants/checkout-ui"
 import { AddressFormData } from "@/lib/types/global"
 import { HttpTypes } from "@medusajs/types"
 import { clsx } from "clsx"
@@ -105,10 +106,11 @@ const AddressForm = ({
       {/* Name fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <label htmlFor="first_name" className="block text-sm font-medium">
+          <label htmlFor="first_name" className={EYEBROW}>
             First Name
           </label>
           <Input
+            variant="underline"
             name="first_name"
             id="first_name"
             type="text"
@@ -118,16 +120,17 @@ const AddressForm = ({
             placeholder="First name"
           />
           {errors.first_name && touchedFields.first_name && (
-            <div className="text-rose-900 text-sm mt-1">
+            <div className="text-rose-700 text-xs mt-1">
               {errors.first_name}
             </div>
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="last_name" className="block text-sm font-medium">
+          <label htmlFor="last_name" className={EYEBROW}>
             Last Name
           </label>
           <Input
+            variant="underline"
             name="last_name"
             id="last_name"
             type="text"
@@ -137,7 +140,7 @@ const AddressForm = ({
             placeholder="Last name"
           />
           {errors.last_name && touchedFields.last_name && (
-            <div className="text-rose-900 text-sm mt-1">
+            <div className="text-rose-700 text-xs mt-1">
               {errors.last_name}
             </div>
           )}
@@ -146,10 +149,11 @@ const AddressForm = ({
 
       {/* Company */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="company" className="block text-sm font-medium">
+        <label htmlFor="company" className={EYEBROW}>
           Company
         </label>
         <Input
+          variant="underline"
           name="company"
           id="company"
           type="text"
@@ -162,10 +166,11 @@ const AddressForm = ({
 
       {/* Address fields */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="address_1" className="block text-sm font-medium">
+        <label htmlFor="address_1" className={EYEBROW}>
           Address Line 1
         </label>
         <Input
+          variant="underline"
           name="address_1"
           id="address_1"
           type="text"
@@ -175,15 +180,16 @@ const AddressForm = ({
           placeholder="Address line 1"
         />
         {errors.address_1 && touchedFields.address_1 && (
-          <div className="text-rose-900 text-sm mt-1">{errors.address_1}</div>
+          <div className="text-rose-700 text-xs mt-1">{errors.address_1}</div>
         )}
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="address_2" className="block text-sm font-medium">
+        <label htmlFor="address_2" className={EYEBROW}>
           Address Line 2
         </label>
         <Input
+          variant="underline"
           name="address_2"
           id="address_2"
           type="text"
@@ -196,10 +202,11 @@ const AddressForm = ({
       {/* City, Province, Postal Code */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="flex flex-col gap-2">
-          <label htmlFor="city" className="block text-sm font-medium">
+          <label htmlFor="city" className={EYEBROW}>
             City
           </label>
           <Input
+            variant="underline"
             name="city"
             id="city"
             type="text"
@@ -209,14 +216,15 @@ const AddressForm = ({
             placeholder="City"
           />
           {errors.city && touchedFields.city && (
-            <div className="text-rose-900 text-sm mt-1">{errors.city}</div>
+            <div className="text-rose-700 text-xs mt-1">{errors.city}</div>
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="province" className="block text-sm font-medium">
+          <label htmlFor="province" className={EYEBROW}>
             State / Province
           </label>
           <Input
+            variant="underline"
             name="province"
             id="province"
             type="text"
@@ -227,10 +235,11 @@ const AddressForm = ({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="postal_code" className="block text-sm font-medium">
+          <label htmlFor="postal_code" className={EYEBROW}>
             Postal Code
           </label>
           <Input
+            variant="underline"
             name="postal_code"
             id="postal_code"
             type="text"
@@ -240,7 +249,7 @@ const AddressForm = ({
             placeholder="Postal code"
           />
           {errors.postal_code && touchedFields.postal_code && (
-            <div className="text-rose-900 text-sm mt-1">
+            <div className="text-rose-700 text-xs mt-1">
               {errors.postal_code}
             </div>
           )}
@@ -260,7 +269,8 @@ const AddressForm = ({
           value={addressFormData.country_code || ""}
           onValueChange={(value) => handleChange("country_code", value)}
         >
-          <SelectTrigger className="!border-zinc-200 !rounded-none !text-base !font-medium !px-4 !py-2 !h-auto !shadow-none !ring-0 focus:!ring-0">
+          {/* Sides are zeroed individually so they never fight the `border-b` width */}
+          <SelectTrigger className="!border-t-0 !border-x-0 !border-b !border-zinc-300 !bg-transparent !rounded-none !text-base !font-medium !px-0 !py-2.5 !h-auto !shadow-none !ring-0 focus:!ring-0">
             <SelectValue placeholder="Select country" />
           </SelectTrigger>
           <SelectContent>
@@ -272,7 +282,7 @@ const AddressForm = ({
           </SelectContent>
         </Select>
         {errors.country_code && touchedFields.country_code && (
-          <div className="text-rose-900 text-sm mt-1">
+          <div className="text-rose-700 text-xs mt-1">
             {errors.country_code}
           </div>
         )}
@@ -280,10 +290,11 @@ const AddressForm = ({
 
       {/* Phone */}
       <div className="flex flex-col gap-2">
-        <label htmlFor="phone" className="block text-sm font-medium">
+        <label htmlFor="phone" className={EYEBROW}>
           Phone
         </label>
         <Input
+          variant="underline"
           name="phone"
           id="phone"
           type="tel"

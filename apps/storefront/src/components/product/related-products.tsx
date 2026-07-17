@@ -25,9 +25,9 @@ export const RelatedProducts = ({
   }
 
   return (
-    <section className="py-24 bg-neutral-50">
+    <section className="py-24 bg-neutral-50 border-t border-neutral-200">
       <div className="content-container">
-        <h2 className="text-2xl md:text-3xl font-display font-semibold text-neutral-900 mb-12 tracking-tight">
+        <h2 className="font-editorial text-2xl md:text-3xl uppercase tracking-[0.15em] text-neutral-900 mb-12 text-center">
           {title}
         </h2>
 
@@ -55,8 +55,8 @@ export const RelatedProducts = ({
                     </div>
                   )}
                 </div>
-                <div className="text-center">
-                  <h3 className="text-sm font-medium text-neutral-900 mb-2 group-hover:text-neutral-600 transition-colors">
+                <div>
+                  <h3 className="text-[11px] uppercase tracking-[0.15em] text-neutral-900 mb-2 group-hover:text-neutral-600 transition-colors">
                     {product.title}
                   </h3>
                   {calculatedPrice && (

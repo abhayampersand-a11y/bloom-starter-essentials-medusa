@@ -3,6 +3,7 @@ import { CartEmpty } from "@/components/cart"
 import { Loading } from "@/components/ui/loading"
 import { useCart } from "@/lib/hooks/use-cart"
 import { useCustomer } from "@/lib/hooks/use-customer"
+import { STEP_COUNTER, STEP_HEADING } from "@/lib/constants/checkout-ui"
 import { type CheckoutStep, CheckoutStepKey } from "@/lib/types/global"
 import {
   useLoaderData,
@@ -144,29 +145,31 @@ const Checkout = () => {
   }
 
   return (
-    <div className="content-container pt-40 pb-8 flex flex-col gap-8">
+    <div className="content-container pt-40 pb-20 flex flex-col gap-12">
       {/* Progress Steps */}
-      <CheckoutProgress
-        steps={steps}
-        currentStepIndex={currentStepIndex}
-        handleStepChange={goToStep}
-      />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-24">
-        <div className="flex flex-col gap-1 lg:col-span-2">
-          <h2 className="text-zinc-900 text-xl">
-            {steps[currentStepIndex].title}
-          </h2>
-          <p className="text-base font-medium text-zinc-600">
-            {steps[currentStepIndex].description}
-          </p>
-        </div>
-        <div className="flex flex-col gap-1">
-          <h2 className="text-zinc-900 text-xl">Order Summary</h2>
-        </div>
+      <div className="flex flex-col gap-6 border-b border-neutral-200 pb-6">
+        <CheckoutProgress
+          steps={steps}
+          currentStepIndex={currentStepIndex}
+          handleStepChange={goToStep}
+        />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-24">
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24">
         {/* Left Column - Checkout Steps */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="lg:col-span-2">
+          {/* Step heading */}
+          <div className="flex flex-col gap-3 mb-10">
+            <span className={STEP_COUNTER}>
+              Step {String(currentStepIndex + 1).padStart(2, "0")} /{" "}
+              {String(steps.length).padStart(2, "0")}
+            </span>
+            <h1 className={STEP_HEADING}>{steps[currentStepIndex].title}</h1>
+            <p className="text-sm text-neutral-500 max-w-md">
+              {steps[currentStepIndex].description}
+            </p>
+          </div>
+
           <Suspense fallback={<Loading />}>
             {cartLoading && <Loading />}
             {cart && (
@@ -196,7 +199,11 @@ const Checkout = () => {
 
                 {/* Review Step */}
                 {step === CheckoutStepKey.REVIEW && (
-                  <ReviewStep cart={cart} onBack={handleBack} />
+                  <ReviewStep
+                    cart={cart}
+                    onBack={handleBack}
+                    onEdit={goToStep}
+                  />
                 )}
               </>
             )}

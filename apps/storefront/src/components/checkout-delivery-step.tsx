@@ -1,5 +1,6 @@
 import ShippingItemSelector from "@/components/shipping-item-selector"
 import { Button } from "@/components/ui/button"
+import { BUTTON_LABEL, SECTION_HEADING } from "@/lib/constants/checkout-ui"
 import {
   useSetCartShippingMethod,
   useShippingOptions,
@@ -49,6 +50,11 @@ const DeliveryStep = ({ cart, onNext, onBack }: DeliveryStepProps) => {
 
   return (
     <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
+        <h2 className={SECTION_HEADING}>Delivery Method</h2>
+        <div className="h-px bg-neutral-200" />
+      </div>
+
       <div className="flex flex-col gap-3">
         {shippingOptions?.map((option) => (
           <ShippingItemSelector
@@ -61,15 +67,21 @@ const DeliveryStep = ({ cart, onNext, onBack }: DeliveryStepProps) => {
         ))}
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button variant="secondary" onClick={onBack} disabled={isSubmitting}>
+      <div className="grid grid-cols-1 gap-4 border-t border-neutral-200 pt-8 sm:grid-cols-[1fr_2fr]">
+        <Button
+          variant="secondary"
+          onClick={onBack}
+          disabled={isSubmitting}
+          className={BUTTON_LABEL}
+        >
           Back
         </Button>
         <Button
           onClick={handleSubmit}
           disabled={!selectedOptionId || isSubmitting}
+          className={BUTTON_LABEL}
         >
-          Next
+          Continue to payment
         </Button>
       </div>
     </div>

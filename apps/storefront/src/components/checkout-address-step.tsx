@@ -3,6 +3,11 @@ import SavedAddressPicker, { NEW_ADDRESS_ID } from "@/components/saved-address-p
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import {
+  BUTTON_LABEL,
+  EYEBROW,
+  SECTION_HEADING,
+} from "@/lib/constants/checkout-ui"
 import { useSetCartAddresses } from "@/lib/hooks/use-checkout"
 import { useCustomer } from "@/lib/hooks/use-customer"
 import {
@@ -223,9 +228,10 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
     <div className="flex flex-col gap-8">
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
-          <h3 className="text-zinc-900 !text-base font-semibold">
-            Shipping Address
-          </h3>
+          <div className="flex flex-col gap-4">
+            <h2 className={SECTION_HEADING}>Shipping Address</h2>
+            <div className="h-px bg-neutral-200" />
+          </div>
 
           {/* Saved addresses, when the customer has any */}
           {savedAddresses.length > 0 && (
@@ -272,10 +278,11 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
 
         {/* Billing Address (if different) */}
         {!sameAsBilling && (
-          <div className="flex flex-col gap-2">
-            <h3 className="text-zinc-900 !text-base font-semibold">
-              Billing Address
-            </h3>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <h2 className={SECTION_HEADING}>Billing Address</h2>
+              <div className="h-px bg-neutral-200" />
+            </div>
             <AddressForm
               addressFormData={billingAddress}
               setAddressFormData={setBillingAddress}
@@ -287,25 +294,30 @@ const AddressStep = ({ cart, onNext }: AddressStepProps) => {
 
         {/* Email */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="block text-sm font-medium">
-            Email Address
+          <label htmlFor="email" className={EYEBROW}>
+            Contact Email
           </label>
           <Input
             id="email"
             type="email"
+            variant="underline"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
-            className="w-full"
           />
-          <p className="text-xs text-zinc-600">
-            You'll receive order updates to this email.
+          <p className="text-xs text-neutral-500">
+            Order confirmation and updates will be sent to this email.
           </p>
         </div>
 
-        <div className="flex">
-          <Button type="submit" disabled={!isFormValid() || isSubmitting}>
-            Next
+        <div className="flex border-t border-neutral-200 pt-8">
+          <Button
+            type="submit"
+            size="fit"
+            disabled={!isFormValid() || isSubmitting}
+            className={`${BUTTON_LABEL} min-w-[280px]`}
+          >
+            Continue to delivery
           </Button>
         </div>
       </form>

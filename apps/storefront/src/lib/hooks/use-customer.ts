@@ -83,6 +83,25 @@ export function useCustomer() {
   })
 }
 
+/** Edits the signed-in customer's own details. Email is fixed — it's the login. */
+export function useUpdateCustomer() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (details: {
+      first_name?: string
+      last_name?: string
+      phone?: string
+    }) => {
+      const { customer } = await sdk.store.customer.update(details)
+      return customer
+    },
+    onSuccess: (customer) => {
+      queryClient.setQueryData(queryKeys.customer.current(), customer)
+    },
+  })
+}
+
 export function useLogin() {
   const queryClient = useQueryClient()
 

@@ -1,6 +1,8 @@
 import { HttpTypes } from "@medusajs/types"
 import { clsx } from "clsx"
 
+import Radio from "@/components/ui/radio"
+
 export const NEW_ADDRESS_ID = "__new__"
 
 type SavedAddressPickerProps = {
@@ -13,6 +15,10 @@ type SavedAddressPickerProps = {
 /**
  * Lets a returning customer pick one of their saved addresses instead of
  * retyping it, with a final option to enter a new one.
+ *
+ * Saved cards carry no visible marker: the black border and the "Delivering
+ * here" badge say which is chosen. The radio itself stays in the DOM, hidden,
+ * so the group is still keyboard and screen reader navigable.
  */
 const SavedAddressPicker = ({
   addresses,
@@ -27,16 +33,15 @@ const SavedAddressPicker = ({
     >
       {addresses.map((address) => {
         const isSelected = selectedId === address.id
-        const isDefault = address.is_default_shipping
 
         return (
           <label
             key={address.id}
             className={clsx(
-              "flex cursor-pointer items-start gap-3 border p-4 transition-colors",
+              "block cursor-pointer border p-6 transition-colors",
               isSelected
-                ? "border-zinc-900 bg-zinc-50"
-                : "border-zinc-200 hover:border-zinc-400"
+                ? "border-neutral-900 bg-white"
+                : "border-neutral-200 bg-white hover:border-neutral-400"
             )}
           >
             <input
@@ -45,56 +50,62 @@ const SavedAddressPicker = ({
               value={address.id}
               checked={isSelected}
               onChange={() => onSelect(address.id!)}
-              className="mt-1 accent-zinc-900"
+              className="sr-only"
             />
-            <span className="flex flex-col gap-1 text-sm">
-              <span className="flex flex-wrap items-center gap-2">
-                <span className="font-medium text-zinc-900">
+
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs uppercase tracking-[0.15em] font-semibold text-neutral-900">
                   {address.first_name} {address.last_name}
                 </span>
-                {isDefault && (
-                  <span className="border border-zinc-300 px-1.5 py-0.5 text-xs text-zinc-600">
+                {address.is_default_shipping && (
+                  <span className="bg-neutral-100 px-2 py-1 text-[10px] uppercase tracking-[0.1em] text-neutral-500">
                     Default
                   </span>
                 )}
-                {isSelected && (
-                  <span className="bg-zinc-900 px-1.5 py-0.5 text-xs text-white">
-                    Delivering here
-                  </span>
-                )}
-              </span>
-              <span className="text-zinc-600">
+              </div>
+
+              {isSelected && (
+                <span className="shrink-0 bg-neutral-900 px-2 py-1 text-[10px] uppercase tracking-[0.1em] text-white">
+                  Delivering here
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-1 text-sm text-neutral-600">
+              <span>
                 {address.address_1}
                 {address.address_2 ? `, ${address.address_2}` : ""}
-                <br />
-                {address.city}
-                {address.province ? `, ${address.province}` : ""} {address.postal_code}
-                <br />
-                {address.country_code?.toUpperCase()}
-                {address.phone ? ` · ${address.phone}` : ""}
               </span>
-            </span>
+              <span>
+                {[address.city, address.province, address.postal_code]
+                  .filter(Boolean)
+                  .join(", ")}
+              </span>
+              <span>
+                {address.country_code?.toUpperCase()}
+                {address.phone ? ` • ${address.phone}` : ""}
+              </span>
+            </div>
           </label>
         )
       })}
 
       <label
         className={clsx(
-          "flex cursor-pointer items-center gap-3 border p-4 transition-colors",
+          "flex cursor-pointer items-center gap-4 border p-6 transition-colors",
           selectedId === NEW_ADDRESS_ID
-            ? "border-zinc-900 bg-zinc-50"
-            : "border-zinc-200 hover:border-zinc-400"
+            ? "border-neutral-900 bg-white"
+            : "border-neutral-200 bg-white hover:border-neutral-400"
         )}
       >
-        <input
-          type="radio"
+        <Radio
           name="saved_address"
           value={NEW_ADDRESS_ID}
           checked={selectedId === NEW_ADDRESS_ID}
           onChange={() => onSelect(NEW_ADDRESS_ID)}
-          className="accent-zinc-900"
         />
-        <span className="text-sm font-medium text-zinc-900">
+        <span className="text-xs uppercase tracking-[0.15em] font-semibold text-neutral-900">
           Use a new address
         </span>
       </label>

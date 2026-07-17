@@ -1,6 +1,6 @@
 import { Loading } from "@/components/ui/loading"
 import { Price } from "@/components/ui/price"
-import Radio from "@/components/ui/radio"
+import SquareRadio from "@/components/ui/square-radio"
 import { calculatePriceForShippingOption } from "@/lib/utils/checkout"
 import { HttpTypes } from "@medusajs/types"
 import { useEffect, useState } from "react"
@@ -50,25 +50,24 @@ const ShippingItemSelector = ({
       <div
         className={`flex items-center justify-between p-5 border transition-colors ${
           isSelected
-            ? "border-zinc-900 bg-zinc-50"
-            : "border-zinc-200 hover:border-zinc-300"
+            ? "border-neutral-900 bg-white"
+            : "border-neutral-200 bg-white hover:border-neutral-400"
         }`}
       >
         <div className="flex items-center gap-4">
-          <Radio
+          <SquareRadio
+            name="shipping_option"
             checked={isSelected}
             onChange={() => handleSelect(shippingOption.id)}
             disabled={isDisabled}
           />
 
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-base font-semibold text-zinc-900 mt-[2px]">
-                {shippingOption.name}
-              </p>
-            </div>
+            <p className="text-xs uppercase tracking-[0.15em] font-semibold text-neutral-900">
+              {shippingOption.name}
+            </p>
             {shippingOption.data?.description !== undefined && (
-              <p className="text-xs text-zinc-600 mt-1">
+              <p className="text-xs text-neutral-500 mt-1.5">
                 {shippingOption.data.description as string}
               </p>
             )}
@@ -76,14 +75,20 @@ const ShippingItemSelector = ({
         </div>
 
         <div className="text-right">
-          {price ? (
+          {typeof price !== "number" ? (
+            <Loading className="w-4 h-4" rows={1} />
+          ) : price === 0 ? (
+            // Free shipping reads better as a word than as a zero amount.
+            <span className="text-[11px] uppercase tracking-[0.12em] font-medium text-neutral-900">
+              Complimentary
+            </span>
+          ) : (
             <Price
               price={price}
               currencyCode={cart.currency_code}
+              textSize="small"
               textWeight="plus"
             />
-          ) : (
-            <Loading className="w-4 h-4" rows={1} />
           )}
         </div>
       </div>

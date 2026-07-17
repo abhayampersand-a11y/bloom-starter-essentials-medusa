@@ -37,6 +37,8 @@ import { Route as CountryCodeAccountIndexRouteImport } from './routes/$countryCo
 import { Route as CountryCodeProductsHandleRouteImport } from './routes/$countryCode/products/$handle'
 import { Route as CountryCodeCollectionsHandleRouteImport } from './routes/$countryCode/collections/$handle'
 import { Route as CountryCodeCategoriesHandleRouteImport } from './routes/$countryCode/categories/$handle'
+import { Route as CountryCodeAccountProfileRouteImport } from './routes/$countryCode/account/profile'
+import { Route as CountryCodeAccountAddressesRouteImport } from './routes/$countryCode/account/addresses'
 import { Route as CountryCodeAccountOrdersIndexRouteImport } from './routes/$countryCode/account/orders/index'
 import { Route as CountryCodeOrderOrderIdConfirmedRouteImport } from './routes/$countryCode/order/$orderId/confirmed'
 import { Route as CountryCodeAccountOrdersOrderIdRouteImport } from './routes/$countryCode/account/orders/$orderId'
@@ -184,6 +186,18 @@ const CountryCodeCategoriesHandleRoute =
     path: '/categories/$handle',
     getParentRoute: () => CountryCodeRoute,
   } as any)
+const CountryCodeAccountProfileRoute =
+  CountryCodeAccountProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => CountryCodeAccountRoute,
+  } as any)
+const CountryCodeAccountAddressesRoute =
+  CountryCodeAccountAddressesRouteImport.update({
+    id: '/addresses',
+    path: '/addresses',
+    getParentRoute: () => CountryCodeAccountRoute,
+  } as any)
 const CountryCodeAccountOrdersIndexRoute =
   CountryCodeAccountOrdersIndexRouteImport.update({
     id: '/orders/',
@@ -228,6 +242,8 @@ export interface FileRoutesByFullPath {
   '/$countryCode/terms': typeof CountryCodeTermsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/$countryCode/': typeof CountryCodeIndexRoute
+  '/$countryCode/account/addresses': typeof CountryCodeAccountAddressesRoute
+  '/$countryCode/account/profile': typeof CountryCodeAccountProfileRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
@@ -259,6 +275,8 @@ export interface FileRoutesByTo {
   '/$countryCode/terms': typeof CountryCodeTermsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/$countryCode': typeof CountryCodeIndexRoute
+  '/$countryCode/account/addresses': typeof CountryCodeAccountAddressesRoute
+  '/$countryCode/account/profile': typeof CountryCodeAccountProfileRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
@@ -293,6 +311,8 @@ export interface FileRoutesById {
   '/$countryCode/terms': typeof CountryCodeTermsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/$countryCode/': typeof CountryCodeIndexRoute
+  '/$countryCode/account/addresses': typeof CountryCodeAccountAddressesRoute
+  '/$countryCode/account/profile': typeof CountryCodeAccountProfileRoute
   '/$countryCode/categories/$handle': typeof CountryCodeCategoriesHandleRoute
   '/$countryCode/collections/$handle': typeof CountryCodeCollectionsHandleRoute
   '/$countryCode/products/$handle': typeof CountryCodeProductsHandleRoute
@@ -328,6 +348,8 @@ export interface FileRouteTypes {
     | '/$countryCode/terms'
     | '/auth/callback'
     | '/$countryCode/'
+    | '/$countryCode/account/addresses'
+    | '/$countryCode/account/profile'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
     | '/$countryCode/products/$handle'
@@ -359,6 +381,8 @@ export interface FileRouteTypes {
     | '/$countryCode/terms'
     | '/auth/callback'
     | '/$countryCode'
+    | '/$countryCode/account/addresses'
+    | '/$countryCode/account/profile'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
     | '/$countryCode/products/$handle'
@@ -392,6 +416,8 @@ export interface FileRouteTypes {
     | '/$countryCode/terms'
     | '/auth/callback'
     | '/$countryCode/'
+    | '/$countryCode/account/addresses'
+    | '/$countryCode/account/profile'
     | '/$countryCode/categories/$handle'
     | '/$countryCode/collections/$handle'
     | '/$countryCode/products/$handle'
@@ -610,6 +636,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CountryCodeCategoriesHandleRouteImport
       parentRoute: typeof CountryCodeRoute
     }
+    '/$countryCode/account/profile': {
+      id: '/$countryCode/account/profile'
+      path: '/profile'
+      fullPath: '/$countryCode/account/profile'
+      preLoaderRoute: typeof CountryCodeAccountProfileRouteImport
+      parentRoute: typeof CountryCodeAccountRoute
+    }
+    '/$countryCode/account/addresses': {
+      id: '/$countryCode/account/addresses'
+      path: '/addresses'
+      fullPath: '/$countryCode/account/addresses'
+      preLoaderRoute: typeof CountryCodeAccountAddressesRouteImport
+      parentRoute: typeof CountryCodeAccountRoute
+    }
     '/$countryCode/account/orders/': {
       id: '/$countryCode/account/orders/'
       path: '/orders'
@@ -635,12 +675,16 @@ declare module '@tanstack/react-router' {
 }
 
 interface CountryCodeAccountRouteChildren {
+  CountryCodeAccountAddressesRoute: typeof CountryCodeAccountAddressesRoute
+  CountryCodeAccountProfileRoute: typeof CountryCodeAccountProfileRoute
   CountryCodeAccountIndexRoute: typeof CountryCodeAccountIndexRoute
   CountryCodeAccountOrdersOrderIdRoute: typeof CountryCodeAccountOrdersOrderIdRoute
   CountryCodeAccountOrdersIndexRoute: typeof CountryCodeAccountOrdersIndexRoute
 }
 
 const CountryCodeAccountRouteChildren: CountryCodeAccountRouteChildren = {
+  CountryCodeAccountAddressesRoute: CountryCodeAccountAddressesRoute,
+  CountryCodeAccountProfileRoute: CountryCodeAccountProfileRoute,
   CountryCodeAccountIndexRoute: CountryCodeAccountIndexRoute,
   CountryCodeAccountOrdersOrderIdRoute: CountryCodeAccountOrdersOrderIdRoute,
   CountryCodeAccountOrdersIndexRoute: CountryCodeAccountOrdersIndexRoute,

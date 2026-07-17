@@ -1,6 +1,7 @@
 import PaymentContainer from "@/components/payment-container"
 import StripeCardContainer from "@/components/stripe-card-container"
 import { Button } from "@/components/ui/button"
+import { BUTTON_LABEL } from "@/lib/constants/checkout-ui"
 import {
   useCartPaymentMethods,
   useInitiateCartPaymentSession,
@@ -79,12 +80,7 @@ const PaymentStep = ({ cart, onNext, onBack }: PaymentStepProps) => {
   return (
     <div className="flex flex-col gap-8">
       {!paidByGiftcard && (availablePaymentMethods?.length ?? 0) > 0 && (
-        <>
-          {availablePaymentMethods.length === 0 && (
-            <p className="text-base font-medium text-zinc-600">
-              No payment methods available
-            </p>
-          )}
+        <div className="flex flex-col gap-3">
           {availablePaymentMethods.map((paymentMethod) => (
             <div key={paymentMethod.id}>
               <PaymentContainer
@@ -104,7 +100,7 @@ const PaymentStep = ({ cart, onNext, onBack }: PaymentStepProps) => {
               </PaymentContainer>
             </div>
           ))}
-        </>
+        </div>
       )}
 
       {paidByGiftcard && (
@@ -130,26 +126,30 @@ const PaymentStep = ({ cart, onNext, onBack }: PaymentStepProps) => {
         </div>
       )}
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 border-t border-neutral-200 pt-8 sm:flex-row sm:items-center sm:justify-between">
         <Button
           variant="secondary"
+          size="fit"
           onClick={onBack}
           disabled={initiatePaymentSessionMutation.isPending}
+          className={`${BUTTON_LABEL} sm:min-w-[160px]`}
         >
           Back
         </Button>
         <Button
+          size="fit"
           onClick={handleSubmit}
           disabled={
             (isStripe && !activeSession) ||
             (!selectedPaymentMethod && !paidByGiftcard) ||
             initiatePaymentSessionMutation.isPending
           }
+          className={`${BUTTON_LABEL} sm:min-w-[280px]`}
           data-testid="submit-payment-button"
         >
           {!activeSession && isStripeFunc(selectedPaymentMethod)
             ? "Enter card details"
-            : "Next"}
+            : "Review order"}
         </Button>
       </div>
     </div>
