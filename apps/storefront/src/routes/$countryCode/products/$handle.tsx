@@ -29,7 +29,7 @@ export const Route = createFileRoute("/$countryCode/products/$handle")({
             handle,
             region_id: region.id,
             fields:
-              "*variants, +variants.inventory_quantity, +variants.manage_inventory, +variants.allow_backorder, +variants.calculated_price, *variants.images, *images, *options, *options.values, *collection, *tags, +metadata",
+              "*variants, +variants.inventory_quantity, +variants.manage_inventory, +variants.allow_backorder, +variants.calculated_price, *variants.images, *images, *options, *options.values, *collection, *tags, *type, +metadata",
           })
         } catch {
           throw notFound()

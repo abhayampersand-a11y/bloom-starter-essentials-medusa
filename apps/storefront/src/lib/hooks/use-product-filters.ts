@@ -6,7 +6,7 @@ import { useMemo, useState } from "react"
  * and size, and the collection/category links drive their own filter groups.
  */
 export const LISTING_PRODUCT_FIELDS =
-  "*variants,*variants.options,*variants.options.option,*variants.calculated_price,*images,*collection,*categories"
+  "*variants,*variants.options,*variants.options.option,*variants.calculated_price,*images,*collection,*categories,*type,*tags"
 
 /** One card on the grid: a product shown under one of its colours. */
 export type VariantItem = {
@@ -176,6 +176,16 @@ export const useProductFilters = ({
       )
     )
 
+    const typeCounts = tally(
+      items.flatMap((item) => (item.product.type ? [item.product.type.value] : []))
+    )
+
+    const tagCounts = tally(
+      items.flatMap((item) =>
+        (item.product.tags ?? []).map((tag) => tag.value)
+      )
+    )
+
     const colorCounts = tally(
       items.flatMap((item) => (item.color ? [item.color] : []))
     )
@@ -200,6 +210,26 @@ export const useProductFilters = ({
         options: Array.from(categoryCounts, ([handle, count]) => ({
           id: handle,
           label: categoryNames.get(handle) ?? handle,
+          count,
+        })).sort((a, b) => a.label.localeCompare(b.label)),
+      },
+      {
+        id: "type",
+        title: "Product Type",
+        type: "checkbox",
+        options: Array.from(typeCounts, ([value, count]) => ({
+          id: value,
+          label: value,
+          count,
+        })).sort((a, b) => a.label.localeCompare(b.label)),
+      },
+      {
+        id: "tag",
+        title: "Tags",
+        type: "checkbox",
+        options: Array.from(tagCounts, ([value, count]) => ({
+          id: value,
+          label: value,
           count,
         })).sort((a, b) => a.label.localeCompare(b.label)),
       },
@@ -267,6 +297,22 @@ export const useProductFilters = ({
         !(item.product.categories ?? []).some((category) =>
           categories.includes(category.handle)
         )
+      ) {
+        return false
+      }
+
+      const types = selected.type ?? []
+      if (
+        types.length &&
+        !(item.product.type && types.includes(item.product.type.value))
+      ) {
+        return false
+      }
+
+      const tags = selected.tag ?? []
+      if (
+        tags.length &&
+        !(item.product.tags ?? []).some((tag) => tags.includes(tag.value))
       ) {
         return false
       }

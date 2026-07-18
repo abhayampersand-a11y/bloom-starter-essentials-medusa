@@ -14,6 +14,8 @@ export type Crumb = { label: string; href?: string }
 type ProductListingProps = {
   title: string
   description?: string
+  /** Banner shown under the breadcrumb — a category/collection display image. */
+  imageUrl?: string
   crumbs: Crumb[]
   products: HttpTypes.StoreProduct[]
   bestSellingIds?: string[]
@@ -30,6 +32,7 @@ type ProductListingProps = {
 export const ProductListing = ({
   title,
   description,
+  imageUrl,
   crumbs,
   products,
   bestSellingIds = [],
@@ -85,6 +88,16 @@ export const ProductListing = ({
           ))}
         </ol>
       </nav>
+
+      {imageUrl && (
+        <div className="mb-10 aspect-[16/5] w-full overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
 
       <header className="mb-10 flex flex-col gap-6 border-b border-neutral-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>

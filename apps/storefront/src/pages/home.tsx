@@ -44,21 +44,29 @@ const Home = () => {
     },
   })
 
-  const { data: collections } = useCollections({ fields: "id,title,handle" })
+  const { data: collections } = useCollections({
+    fields: "id,title,handle,metadata",
+  })
 
   const products = (productsData?.pages?.[0]?.products ??
     []) as HttpTypes.StoreProduct[]
 
-  // The three collections carry the campaign art in the order it was shot; any
-  // collection beyond the artwork we have is left out rather than shown bare.
+  // A collection's own display image (set in the admin) wins; the campaign art
+  // fills in for collections that don't have one yet.
   const trending: TrendingEntry[] = (collections ?? [])
     .slice(0, MEDIA.trending.length)
-    .map((collection: HttpTypes.StoreCollection, index: number) => ({
-      handle: collection.handle,
-      title: collection.title,
-      subtitle: "Shop the collection",
-      imageUrl: MEDIA.trending[index],
-    }))
+    .map((collection: HttpTypes.StoreCollection, index: number) => {
+      const displayImage = collection.metadata?.image_url
+      return {
+        handle: collection.handle,
+        title: collection.title,
+        subtitle: "Shop the collection",
+        imageUrl:
+          typeof displayImage === "string" && displayImage
+            ? displayImage
+            : MEDIA.trending[index],
+      }
+    })
 
   return (
     <div className="min-h-screen bg-white">

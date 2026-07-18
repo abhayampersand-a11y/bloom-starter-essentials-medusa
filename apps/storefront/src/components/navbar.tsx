@@ -12,10 +12,16 @@ import {
 import { useCategories } from "@/lib/hooks/use-categories"
 import { useCollections } from "@/lib/hooks/use-collections"
 import { getCountryCodeFromPath } from "@/lib/utils/region"
+import { HttpTypes } from "@medusajs/types"
 import * as NavigationMenu from "@radix-ui/react-navigation-menu"
 import { Link, useLocation } from "@tanstack/react-router"
 import { EllipsisHorizontal } from "@medusajs/icons"
 import { useState, useEffect } from "react"
+
+const categoryImage = (category: HttpTypes.StoreProductCategory) => {
+  const url = category.metadata?.image_url
+  return typeof url === "string" && url.length > 0 ? url : null
+}
 
 export const Navbar = () => {
   const location = useLocation()
@@ -24,8 +30,10 @@ export const Navbar = () => {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
+  // Every top-level category (Men, Women, Tops, Bottoms, ...) drives the nav.
   const { data: topLevelCategories } = useCategories({
-    fields: "id,name,handle,parent_category_id,category_children.*",
+    fields:
+      "id,name,handle,rank,parent_category_id,metadata,category_children.*",
     queryParams: { parent_category_id: "null" },
   })
 
@@ -33,13 +41,12 @@ export const Navbar = () => {
     fields: "id,title,handle",
   })
 
-  const topsCategory = topLevelCategories?.find((cat) => cat.handle === "tops")
-  const bottomsCategory = topLevelCategories?.find((cat) => cat.handle === "bottoms")
+  const navCategories = topLevelCategories ?? []
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
         // Scrolling down
         setIsVisible(false)
@@ -47,7 +54,7 @@ export const Navbar = () => {
         // Scrolling up
         setIsVisible(true)
       }
-      
+
       setLastScrollY(currentScrollY)
     }
 
@@ -57,7 +64,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <div 
+      <div
         className={`fixed top-0 inset-x-0 z-50 bg-neutral-50 isolate transition-transform duration-300 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
@@ -82,86 +89,71 @@ export const Navbar = () => {
               {/* Desktop Navigation Links */}
               <NavigationMenu.Root className="hidden lg:flex items-center h-full relative">
                 <NavigationMenu.List className="flex items-center gap-x-8 h-full">
-                  {/* Tops dropdown */}
-                  {topsCategory && (
-                    <NavigationMenu.Item className="relative">
-                      <NavigationMenu.Trigger className="text-neutral-700 hover:text-neutral-900 flex items-center gap-1 select-none transition-colors text-sm py-2 px-1 group">
-                        Tops
-                        <svg
-                          className="w-3 h-3 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </NavigationMenu.Trigger>
-                      <NavigationMenu.Content className="absolute left-0 top-full mt-2 bg-white border border-neutral-200 shadow-lg rounded-md min-w-[200px] z-50 data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight">
-                        <div className="flex flex-col py-2">
-                          <NavigationMenu.Link asChild>
-                            <Link
-                              to="/$countryCode/categories/$handle"
-                              params={{ countryCode: countryCode || "us", handle: topsCategory.handle }}
-                              className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm font-semibold transition-colors"
-                            >
-                              All Tops
-                            </Link>
-                          </NavigationMenu.Link>
-                          {topsCategory.category_children?.map((subcategory) => (
-                            <NavigationMenu.Link key={subcategory.id} asChild>
+                  {navCategories.map((category) =>
+                    category.category_children?.length ? (
+                      <NavigationMenu.Item key={category.id} className="relative">
+                        <NavigationMenu.Trigger className="text-neutral-700 hover:text-neutral-900 flex items-center gap-1 select-none transition-colors text-sm py-2 px-1 group">
+                          {category.name}
+                          <svg
+                            className="w-3 h-3 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </NavigationMenu.Trigger>
+                        <NavigationMenu.Content className="absolute left-0 top-full mt-2 bg-white border border-neutral-200 shadow-lg rounded-md min-w-[200px] z-50 data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight">
+                          <div className="flex flex-col py-2">
+                            {categoryImage(category) && (
                               <Link
                                 to="/$countryCode/categories/$handle"
-                                params={{ countryCode: countryCode || "us", handle: subcategory.handle }}
-                                className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm transition-colors"
+                                params={{ countryCode: countryCode || "us", handle: category.handle }}
+                                className="mx-2 mb-2 block overflow-hidden rounded"
                               >
-                                {subcategory.name}
+                                <img
+                                  src={categoryImage(category)!}
+                                  alt={category.name}
+                                  className="h-24 w-full object-cover transition-transform duration-300 hover:scale-105"
+                                />
                               </Link>
-                            </NavigationMenu.Link>
-                          ))}
-                        </div>
-                      </NavigationMenu.Content>
-                    </NavigationMenu.Item>
-                  )}
-
-                  {/* Bottoms dropdown */}
-                  {bottomsCategory && (
-                    <NavigationMenu.Item className="relative">
-                      <NavigationMenu.Trigger className="text-neutral-700 hover:text-neutral-900 flex items-center gap-1 select-none transition-colors text-sm py-2 px-1 group">
-                        Bottoms
-                        <svg
-                          className="w-3 h-3 transition-transform duration-200 group-data-[state=open]:rotate-180"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </NavigationMenu.Trigger>
-                      <NavigationMenu.Content className="absolute left-0 top-full mt-2 bg-white border border-neutral-200 shadow-lg rounded-md min-w-[200px] z-50 data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight">
-                        <div className="flex flex-col py-2">
-                          <NavigationMenu.Link asChild>
-                            <Link
-                              to="/$countryCode/categories/$handle"
-                              params={{ countryCode: countryCode || "us", handle: bottomsCategory.handle }}
-                              className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm font-semibold transition-colors"
-                            >
-                              All Bottoms
-                            </Link>
-                          </NavigationMenu.Link>
-                          {bottomsCategory.category_children?.map((subcategory) => (
-                            <NavigationMenu.Link key={subcategory.id} asChild>
+                            )}
+                            <NavigationMenu.Link asChild>
                               <Link
                                 to="/$countryCode/categories/$handle"
-                                params={{ countryCode: countryCode || "us", handle: subcategory.handle }}
-                                className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm transition-colors"
+                                params={{ countryCode: countryCode || "us", handle: category.handle }}
+                                className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm font-semibold transition-colors"
                               >
-                                {subcategory.name}
+                                All {category.name}
                               </Link>
                             </NavigationMenu.Link>
-                          ))}
-                        </div>
-                      </NavigationMenu.Content>
-                    </NavigationMenu.Item>
+                            {category.category_children?.map((subcategory) => (
+                              <NavigationMenu.Link key={subcategory.id} asChild>
+                                <Link
+                                  to="/$countryCode/categories/$handle"
+                                  params={{ countryCode: countryCode || "us", handle: subcategory.handle }}
+                                  className="px-6 py-3 text-neutral-700 hover:text-neutral-900 hover:bg-neutral-50 text-sm transition-colors"
+                                >
+                                  {subcategory.name}
+                                </Link>
+                              </NavigationMenu.Link>
+                            ))}
+                          </div>
+                        </NavigationMenu.Content>
+                      </NavigationMenu.Item>
+                    ) : (
+                      <NavigationMenu.Item key={category.id}>
+                        <NavigationMenu.Link asChild>
+                          <Link
+                            to="/$countryCode/categories/$handle"
+                            params={{ countryCode: countryCode || "us", handle: category.handle }}
+                            className="text-neutral-700 hover:text-neutral-900 transition-colors text-sm py-2 px-1"
+                          >
+                            {category.name}
+                          </Link>
+                        </NavigationMenu.Link>
+                      </NavigationMenu.Item>
+                    )
                   )}
 
                   {/* Collections dropdown */}
@@ -202,7 +194,7 @@ export const Navbar = () => {
                       </div>
                     </NavigationMenu.Content>
                   </NavigationMenu.Item>
-                  
+
                   <NavigationMenu.Item>
                     <NavigationMenu.Link asChild>
                       <a
@@ -238,67 +230,49 @@ export const Navbar = () => {
                     <DrawerTitle className="uppercase font-display text-lg tracking-wide">Menu</DrawerTitle>
                   </DrawerHeader>
                   <div className="flex flex-col py-4">
-                    {/* Tops */}
-                    {topsCategory && (
-                      <>
-                        <div className="px-6 py-4 text-neutral-900 text-base font-semibold uppercase tracking-wide">
-                          Tops
-                        </div>
-                        <div className="flex flex-col">
+                    {navCategories.map((category) => (
+                      <div key={category.id}>
+                        {category.category_children?.length ? (
+                          <>
+                            <div className="px-6 py-4 text-neutral-900 text-base font-semibold uppercase tracking-wide">
+                              {category.name}
+                            </div>
+                            <div className="flex flex-col">
+                              <DrawerClose asChild>
+                                <Link
+                                  to="/$countryCode/categories/$handle"
+                                  params={{ countryCode: countryCode || "us", handle: category.handle }}
+                                  className="px-10 py-3 text-neutral-600 hover:bg-sand-50 transition-colors font-semibold"
+                                >
+                                  All {category.name}
+                                </Link>
+                              </DrawerClose>
+                              {category.category_children?.map((subcategory) => (
+                                <DrawerClose key={subcategory.id} asChild>
+                                  <Link
+                                    to="/$countryCode/categories/$handle"
+                                    params={{ countryCode: countryCode || "us", handle: subcategory.handle }}
+                                    className="px-10 py-3 text-neutral-600 hover:bg-sand-50 transition-colors"
+                                  >
+                                    {subcategory.name}
+                                  </Link>
+                                </DrawerClose>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
                           <DrawerClose asChild>
                             <Link
                               to="/$countryCode/categories/$handle"
-                              params={{ countryCode: countryCode || "us", handle: topsCategory.handle }}
-                              className="px-10 py-3 text-neutral-600 hover:bg-sand-50 transition-colors font-semibold"
+                              params={{ countryCode: countryCode || "us", handle: category.handle }}
+                              className="block px-6 py-4 text-neutral-900 text-base font-semibold uppercase tracking-wide hover:bg-sand-50"
                             >
-                              All Tops
+                              {category.name}
                             </Link>
                           </DrawerClose>
-                          {topsCategory.category_children?.map((subcategory) => (
-                            <DrawerClose key={subcategory.id} asChild>
-                              <Link
-                                to="/$countryCode/categories/$handle"
-                                params={{ countryCode: countryCode || "us", handle: subcategory.handle }}
-                                className="px-10 py-3 text-neutral-600 hover:bg-sand-50 transition-colors"
-                              >
-                                {subcategory.name}
-                              </Link>
-                            </DrawerClose>
-                          ))}
-                        </div>
-                      </>
-                    )}
-
-                    {/* Bottoms */}
-                    {bottomsCategory && (
-                      <>
-                        <div className="px-6 py-4 text-neutral-900 text-base font-semibold uppercase tracking-wide">
-                          Bottoms
-                        </div>
-                        <div className="flex flex-col">
-                          <DrawerClose asChild>
-                            <Link
-                              to="/$countryCode/categories/$handle"
-                              params={{ countryCode: countryCode || "us", handle: bottomsCategory.handle }}
-                              className="px-10 py-3 text-neutral-600 hover:bg-sand-50 transition-colors font-semibold"
-                            >
-                              All Bottoms
-                            </Link>
-                          </DrawerClose>
-                          {bottomsCategory.category_children?.map((subcategory) => (
-                            <DrawerClose key={subcategory.id} asChild>
-                              <Link
-                                to="/$countryCode/categories/$handle"
-                                params={{ countryCode: countryCode || "us", handle: subcategory.handle }}
-                                className="px-10 py-3 text-neutral-600 hover:bg-sand-50 transition-colors"
-                              >
-                                {subcategory.name}
-                              </Link>
-                            </DrawerClose>
-                          ))}
-                        </div>
-                      </>
-                    )}
+                        )}
+                      </div>
+                    ))}
 
                     {/* Collections */}
                     <div className="px-6 py-4 text-neutral-900 text-base font-semibold uppercase tracking-wide">

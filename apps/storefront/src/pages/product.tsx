@@ -161,6 +161,25 @@ const ProductDetails = () => {
                 <ProductAccordions description={product.description} />
               </div>
 
+              {/* Type & tags */}
+              {(product.type?.value || (product.tags?.length ?? 0) > 0) && (
+                <div className="mt-8 flex flex-wrap items-center gap-2">
+                  {product.type?.value && (
+                    <span className="border border-neutral-900 px-3 py-1 text-[10px] uppercase tracking-[0.15em] text-neutral-900">
+                      {product.type.value}
+                    </span>
+                  )}
+                  {product.tags?.map((tag: HttpTypes.StoreProductTag) => (
+                    <span
+                      key={tag.id}
+                      className="border border-neutral-200 px-3 py-1 text-[10px] uppercase tracking-[0.15em] text-neutral-500"
+                    >
+                      {tag.value}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {/* Share Product */}
               <button
                 onClick={handleShare}

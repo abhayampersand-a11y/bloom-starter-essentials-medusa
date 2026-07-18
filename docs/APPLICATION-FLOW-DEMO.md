@@ -87,9 +87,10 @@ To start both apps, from the repo root: `pnpm dev`
 ### Step 7 — Categories (the navigation tree)
 **Page:** Admin → **Products → Categories** (left sidebar)
 
-- **What you see:** A tree/table of categories, some nested (parent → child).
+- **What you see:** A tree/table of categories, some nested (parent → child). Besides the garment tree (Tops/Bottoms), there are two **gender categories — Men and Women** — every product is filed under one or both, so shoppers can browse by gender from the navbar.
 - Click a category → detail page shows its products table; the `...` button → **Edit ranking** lets you drag to reorder.
-- **Try it:** Click **Create** → type name + handle → choose a parent (or none) → **Save**. The storefront navbar/menus are built from these.
+- **Display Image** *(our custom widget, right sidebar)* — upload a photo or paste a URL → **Save**. The storefront uses it as the category's banner and in the navbar dropdown.
+- **Try it:** Click **Create** → type name + handle → choose a parent (or none) → **Save**. The storefront navbar/menus are built from these — every top-level category gets its own menu entry automatically.
 
 ### Step 8 — Collections (curated groups for marketing)
 **Page:** Admin → **Products → Collections**
@@ -97,6 +98,14 @@ To start both apps, from the repo root: `pnpm dev`
 - **What you see:** A table of collections (e.g. seasonal or featured groups).
 - Difference vs categories: **categories = permanent navigation tree**; **collections = marketing groupings** ("New Arrivals", "Summer Sale") shown as featured sections on the storefront home page.
 - Click a collection → **Products** section → `...` → **Add products** opens a product picker with checkboxes.
+- **Display Image** *(our custom widget)* — same as categories: the image you set here becomes the collection's banner on the storefront and its card in the home page's "Trending" section.
+
+### Step 8b — Product tags & types
+**Pages:** Settings → **Product Tags** and Settings → **Product Types**
+
+- **Tags** are marketing labels (Essential, Bestseller, Training, New Arrival, Outerwear, Unisex); **types** name the garment (T-Shirt, Hoodie, Leggings, ...). Both are assigned per product in the product page's **Organize** card.
+- Each tag/type detail page also has the **Display Image** widget.
+- On the storefront, tags and type show as chips on the product page and drive the **Product Type** and **Tags** filter groups on every listing.
 
 ### Step 9 — Products (the heart of the store)
 **Page:** Admin → **Products**
@@ -196,3 +205,5 @@ To start both apps, from the repo root: `pnpm dev`
 | Shipping | Standard Shipping (India), free, Mumbai Warehouse |
 | Colour swatches | Product page (admin) → "Colour Codes" widget → picked colours appear on storefront |
 | Re-run India setup | `npx medusa exec ./src/scripts/setup-india.ts` (idempotent) |
+| Re-run catalog setup (Men/Women, tags, types, images) | `npx medusa exec ./src/scripts/setup-catalog.ts` (idempotent) |
+| Category/collection/tag/type images | Their admin detail pages → "Display Image" widget → shown as storefront banners, nav & home imagery |

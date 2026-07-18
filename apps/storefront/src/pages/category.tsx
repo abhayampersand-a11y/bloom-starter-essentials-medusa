@@ -24,10 +24,13 @@ const Category = () => {
     query_params: { category_id: categoryIds },
   })
 
+  const imageUrl = category?.metadata?.image_url
+
   return (
     <ProductListing
       title={category?.name || "Category"}
       description={category?.description || undefined}
+      imageUrl={typeof imageUrl === "string" && imageUrl ? imageUrl : undefined}
       crumbs={[
         { label: "Home", href: `/${countryCode ?? "in"}` },
         { label: "Categories" },

@@ -20,11 +20,13 @@ export const Collection = ({ collection, region }: CollectionProps) => {
   })
 
   const description = collection.metadata?.description
+  const imageUrl = collection.metadata?.image_url
 
   return (
     <ProductListing
       title={collection.title}
       description={typeof description === "string" ? description : undefined}
+      imageUrl={typeof imageUrl === "string" && imageUrl ? imageUrl : undefined}
       crumbs={[
         { label: "Home", href: `/${countryCode ?? "in"}` },
         { label: "Collections" },

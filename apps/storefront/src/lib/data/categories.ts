@@ -23,7 +23,7 @@ export const retrieveCategory = async ({
   const product_categories = await listCategories({
     queryParams: {
       handle,
-      fields: fields || "*category_children"
+      fields: fields || "*category_children,+metadata"
     },
   })
 
